@@ -28,6 +28,14 @@ resource "azurerm_virtual_network" "virtual_network" {
   resource_group_name = azurerm_resource_group.network_rg.name
 }
 
+resource "azurerm_network_security_group" "security_groups" {
+  for_each            = local.snet_tiers
+  name                = "nsg-${each.key}"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.network_rg.name
+  security_rule       = []
+}
+
 resource "azurerm_subnet" "subnets" {
   for_each             = local.snet_tiers
   name                 = "snet-${each.key}"
@@ -45,13 +53,19 @@ resource "azurerm_subnet" "subnets" {
     }
   }
   private_endpoint_network_policies = "Enabled"
-  default_outbound_access_enabled = true
+  default_outbound_access_enabled   = true
+}
+
+resource "azurerm_subnet_network_security_group_association" "security_rules_association" {
+  for_each                  = { for i, k in keys(local.snet_tiers) : i => k }
+  subnet_id                 = azurerm_subnet.subnets[each.value].id
+  network_security_group_id = azurerm_network_security_group.security_groups[each.value].id
 }
 
 resource "azurerm_network_watcher" "net_watcher" {
-    name = "github_runner-network_watcher"
-    resource_group_name = azurerm_resource_group.network_rg.name
-    location = azurerm_resource_group.network_rg.location
+  name                = "github_runner-network_watcher"
+  resource_group_name = azurerm_resource_group.network_rg.name
+  location            = azurerm_resource_group.network_rg.location
 }
 
 
