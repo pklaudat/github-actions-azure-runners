@@ -1,19 +1,16 @@
 
-variable "github_repository" {
+variable "github_repository_name" {
   type = string
+  description = "Github repository full name. Include repo owner."
 }
 
-variable "app_registration_client_id" {
+variable "github_app_id" {
   type      = string
+  description = "Github App ID."
   sensitive = true
 }
 
-variable "app_registration_tenant_id" {
-  type      = string
-  sensitive = true
-}
-
-variable "azure_subscription_id" {
-  type      = string
-  sensitive = true
+variable "installation_id" {
+  type = string
+  description = "Installation ID for this github app. Needed to retrieve access token."
 }
