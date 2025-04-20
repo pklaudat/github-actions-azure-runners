@@ -1,0 +1,47 @@
+
+name: Lint, Build & Scan Docker image
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  docker_ci:
+    name: Lint, Build, and Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: ./Dockerfile
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: pklaudat/github-runners
+
+      - name: Build image (but do not push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+
+      - name: Scan Docker image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.meta.outputs.tags }}
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
