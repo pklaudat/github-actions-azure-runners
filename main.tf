@@ -6,29 +6,21 @@ locals {
 }
 
 
-variable "location" {
-    type = string
-  
-}
-
 module "private_network" {
-    source = "./modules/network"
-    location = var.location
-    address_space = ["10.0.0.0/22"] 
-}
-
-output "test" {
-    value = local.github_runner_subnet
+  source        = "./modules/network"
+  location      = var.location
+  address_space = ["10.0.0.0/22"]
 }
 
 module "github_runners" {
-    source = "./modules/container-apps"
-    location = var.location
-    github_organization_name = "org"
-    github_runner_cpu = 0.5
-    github_runner_memory = 0.5
-    github_runners_image = "docker/github-actions"
-    availabiltiy_zones = ["1"]
-    network_resource_group_name = module.private_network.resource_group_name
-    subnet_resource_id = local.github_runner_subnet
+  source                      = "./modules/container-apps"
+  location                    = var.location
+  github_organization_name    = var.github_organization_name
+  github_repository_name      = var.github_repository_name
+  github_runner_cpu           = var.github_runner_cpu
+  github_runner_memory        = var.github_runner_memory
+  github_runners_image        = var.github_runners_image
+  network_resource_group_name = module.private_network.resource_group_name
+  subnet_resource_id          = local.github_runner_subnet
+  access_token                = var.github_pat_token
 }
