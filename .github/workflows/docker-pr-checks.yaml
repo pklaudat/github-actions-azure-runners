@@ -5,9 +5,9 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - Dockerfile
-      - .github/workflows/docker-pr-checks.yaml
+  paths:
+    - Dockerfile
+    - .github/workflows/docker-pr-checks.yaml
 
 jobs:
   docker_ci:
