@@ -6,42 +6,42 @@ variable "location" {
 
 
 variable "github_repository_name" {
-  type = string
+  type        = string
   description = "Github repository name."
 }
 
 
 variable "github_runner_cpu" {
-  type    = number
+  type        = number
   description = "Github runner cpu size."
-  default = 0.25
+  default     = 0.25
 }
 
 variable "github_runner_memory" {
-  type    = number
+  type        = number
   description = "Runner memory size in Gib."
-  default = 0.5
+  default     = 0.5
 }
 
 variable "github_runners_image" {
-  type    = string
+  type        = string
   description = "Container image being used to execute the runners."
-  default = "pklaudat/github-actions"
+  default     = "pklaudat/github-actions"
 }
 
 variable "github_organization_name" {
-  type = string
+  type        = string
   description = "Github org name - known as owner name. In case there is no organization use the user id."
 }
 
 
 variable "network_resource_group_name" {
-  type = string
+  type        = string
   description = "Resource group where the private network is hosted."
 }
 
 variable "subnet_resource_id" {
-  type = string
+  type        = string
   description = "Subnet Resource id - used in the container environment. Bind service to a private network for secure deployments."
 }
 

@@ -6,7 +6,7 @@ locals {
     repos                     = var.github_repository_name
     targetWorkflowQueueLength = 1
     runnerScope               = "repo"
-    githubAPIURL            = "https://api.github.com"
+    githubAPIURL              = "https://api.github.com"
   }
   environment_variables_github = [
     {
