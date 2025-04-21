@@ -5,17 +5,10 @@ locals {
     owner                     = var.github_organization_name
     repos                     = var.github_repository_name
     targetWorkflowQueueLength = 1
-    runnerScope               = "repository"
+    runnerScope               = "repo"
+    githubAPIURL            = "https://api.github.com"
   }
   environment_variables_github = [
-    # {
-    #   name  = "REPO_OWNER"
-    #   value = var.github_organization_name
-    # },
-    # {
-    #   name  = "REPO_NAME"
-    #   value = var.github_repository_name
-    # },
     {
       name        = "GITHUB_PAT"
       secret_name = local.authentication_settings_github[0].name
@@ -31,7 +24,7 @@ locals {
   ]
   authentication_settings_github = [
     {
-      name  = "access-token"
+      name  = "personal-access-token"
       value = var.access_token
     }
   ]

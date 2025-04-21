@@ -83,6 +83,10 @@ resource "azurerm_container_app_job" "self_hosted_runners" {
         name             = "github-runner"
         custom_rule_type = "github-runner"
         metadata         = local.keda_meta_data_github
+        authentication {
+          trigger_parameter = "personalAccessToken"
+          secret_name       = local.authentication_settings_github[0].name
+        }
       }
     }
   }
