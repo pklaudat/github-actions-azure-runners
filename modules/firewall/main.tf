@@ -105,22 +105,4 @@ resource "azurerm_firewall_policy_rule_collection_group" "app_policy_rule_collec
   }
 }
 
-output "firewall_id" {
-  description = "value of the firewall id."
-  value       = azurerm_firewall.firewall.id
-}
 
-output "firewall_public_ip" {
-  description = "The public IP address of the firewall."
-  value       = azurerm_public_ip.firewall_public_ip.ip_address
-}
-
-output "firewall_policy_id" {
-  description = "The ID of the firewall policy."
-  value       = azurerm_firewall_policy.azfw_policy.id
-}
-
-output "firewall_private_ip" {
-  description = "The private IP address of the firewall."
-  value       = azurerm_firewall.firewall.ip_configuration[0].private_ip_address
-}
