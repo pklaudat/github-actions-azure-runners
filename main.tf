@@ -7,9 +7,21 @@ locals {
 
 
 module "private_network" {
-  source        = "./modules/network"
-  location      = var.location
-  address_space = ["10.0.0.0/22"]
+  source              = "./modules/network"
+  location            = var.location
+  address_space       = ["10.0.0.0/22"]
+  route_to_firewall   = var.deploy_firewall
+  firewall_private_ip = var.deploy_firewall ? module.firewall.firewall_private_ip: null
+}
+
+module "firewall" {
+  count = var.deploy_firewall ? 1 : 0
+  source                        = "./modules/firewall"
+  firewall_location             = var.location
+  firewall_name                 = "githubrunners-firewall"
+  firewall_resource_group_name  = module.private_network.resource_group_name
+  firewall_subnet_id            = module.private_network.firewall_subnet_id
+  firewall_management_subnet_id = module.private_network.firewall_management_subnet_id
 }
 
 module "github_runners" {

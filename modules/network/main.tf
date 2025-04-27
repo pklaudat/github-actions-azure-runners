@@ -1,13 +1,13 @@
 locals {
   snet_tiers = {
     apps = {
-      size = "24"
+      size = "25"
     }
     databases = {
-      size = "24"
+      size = "25"
     }
     web = {
-      size = "24"
+      size = "25"
     }
     github_runners = {
       size       = "24"
@@ -36,6 +36,21 @@ resource "azurerm_network_security_group" "security_groups" {
   security_rule       = []
 }
 
+resource "azurerm_route_table" "route_table" {
+  for_each            = local.snet_tiers
+  name                = "udr-${each.key}"
+  location            = azurerm_resource_group.network_rg.location
+  resource_group_name = azurerm_resource_group.network_rg.name
+  route = [
+    {
+      name                   = "default-route"
+      address_prefix         = "0.0.0.0/0"
+      next_hop_type          = var.route_to_firewall ? "VirtualAppliance" : "Internet"
+      next_hop_in_ip_address = var.route_to_firewall ? var.firewall_private_ip : null
+    }
+  ]
+}
+
 resource "azurerm_subnet" "subnets" {
   for_each             = local.snet_tiers
   name                 = "snet-${each.key}"
@@ -53,13 +68,41 @@ resource "azurerm_subnet" "subnets" {
     }
   }
   private_endpoint_network_policies = "Enabled"
-  default_outbound_access_enabled   = true
+  default_outbound_access_enabled   = !var.route_to_firewall
 }
+
+
+resource "azurerm_subnet" "firewall_subnet" {
+  count                             = var.route_to_firewall ? 1 : 0
+  name                              = "AzureFirewallSubnet"
+  resource_group_name               = azurerm_resource_group.network_rg.name
+  virtual_network_name              = azurerm_virtual_network.virtual_network.name
+  address_prefixes                  = [cidrsubnet(var.address_space[0], 26 - tonumber(split("/", var.address_space[0])[1]), length(keys(local.snet_tiers)) + 1)]
+  private_endpoint_network_policies = "Enabled"
+  default_outbound_access_enabled   = !var.route_to_firewall
+}
+
+resource "azurerm_subnet" "firewall_management_subnet" {
+  count                             = var.route_to_firewall ? 1 : 0
+  name                              = "AzureFirewallManagementSubnet"
+  resource_group_name               = azurerm_resource_group.network_rg.name
+  virtual_network_name              = azurerm_virtual_network.virtual_network.name
+  address_prefixes                  = [cidrsubnet(var.address_space[0], 26 - tonumber(split("/", var.address_space[0])[1]), length(keys(local.snet_tiers)))]
+  private_endpoint_network_policies = "Enabled"
+  default_outbound_access_enabled   = !var.route_to_firewall
+}
+
 
 resource "azurerm_subnet_network_security_group_association" "security_rules_association" {
   for_each                  = { for i, k in keys(local.snet_tiers) : i => k }
   subnet_id                 = azurerm_subnet.subnets[each.value].id
   network_security_group_id = azurerm_network_security_group.security_groups[each.value].id
+}
+
+resource "azurerm_subnet_route_table_association" "route_table_association" {
+  for_each       = { for i, k in keys(local.snet_tiers) : i => k }
+  subnet_id      = azurerm_subnet.subnets[each.value].id
+  route_table_id = azurerm_route_table.route_table[each.value].id
 }
 
 resource "azurerm_network_watcher" "net_watcher" {
