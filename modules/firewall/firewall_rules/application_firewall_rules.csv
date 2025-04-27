@@ -1,0 +1,4 @@
+Name,Priority,Action,Source,SourceType,Destination,Protocol,Port
+github-api,200,Allow,10.0.0.0/8,IP address,www.github.com,Https,443
+google,201,Allow,10.0.0.0/8,IP address,www.google.com,Https,443
+microsoft,202,Allow,10.0.0.0/8,IP address,*.microsoft.com,Https,443
